@@ -1,0 +1,52 @@
+---
+title: "Team-Draw 4. Hnaseatic Jugger Cup"
+author: "Christian 'Becko' Beck"
+date: "1 August 2018"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Registration Information from the JTR
+
+Just loading the JTR-registration information for the tournament.
+
+The data is given as a CSV-file. Teams are ordered alpahbetically by their name and given an id number based on their rank in this order. Additionally the data set contains the column FIX, which indicates if a team is set as a participant and not part of the random draw process - those teams are home-teams from Lübeck, a few invitations for other teams who we like very much or who help us with our tournament-organisation, and newbie teams, whom we want to give a chance to participate for the foirst time. All none FIX teams are part of the random draw.
+
+```{r load}
+library(readr)
+
+registration <- read_csv("registration.csv", 
+                         col_types = cols(FIX = col_logical()))
+
+knitr::kable(registration)
+```
+
+7 teams are set FIX, 12 teams are participating in the random draw, 9 teams will be drawn and 3 will be kicked out from the set (you can reenscribe to the list to participate in the usual succession scheme).
+
+## Random draw - participation
+
+And now fo the random draw. A seed is set for reproducability. A new column is added (IN), which indicates if a team is participating in the tournament.
+
+```{r draw}
+library(tidyverse)
+
+set.seed(2018)
+
+teams.in <- sample(x = (registration %>% filter(!FIX))$Position,
+                   size = 9,
+                   replace = FALSE)
+
+registration$IN <- registration$FIX
+registration$IN[teams.in] <- TRUE
+
+knitr::kable(registration %>% filter(IN))
+
+knitr::kable(registration %>% filter(!IN))
+```
+
+Above you see the list of participants according to the random draw and the teams that did not pass the draw. I hope this does not cause any hard feelings - just reenlist for the succession procedure if you still want to participate.
